@@ -44,8 +44,6 @@ export default function Home() {
           date: new Date(data.dt * 1000 + data.timezone * 1000).toString(),
         };
         let sortData = [...cardList, getJson].sort((a, b) => b.count - a.count);
-        // console.log(sortData, "sortData");
-        // cardList.sort((a, b) => b.name - a.name);
         setCardList(sortData);
       })
       .catch((error) => {
