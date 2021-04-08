@@ -17,6 +17,7 @@ export default function Home() {
   //     date: "Thu Apr 08 2021 01:32:12 GMT+0700",
   //   },
   // ];
+
   const [cardList, setCardList]: any = useState([]);
   const [countData, setCountData] = useState(0);
   const searchWeather = async (value: string) => {
@@ -24,31 +25,33 @@ export default function Home() {
       "https://api.openweathermap.org/data/2.5/weather?q=" +
       value +
       "&appid=2c486a422a8abed95fca0bbd2c35fc80";
-    await axios
-      .get(url)
-      .then(({ data }) => {
-        const newState = countData + 1;
-        setCountData(newState);
-        const temp = parseInt(data.main.temp - 273);
-        const getJson = {
-          id: Math.floor(Math.random() * 10000) + 1,
-          count: newState,
-          name: data.name,
-          weather: data.weather[0].main,
-          description: data.weather[0].description,
-          icon:
-            "http://openweathermap.org/img/wn/" +
-            data.weather[0].icon +
-            "@2x.png",
-          temp: temp,
-          date: new Date(data.dt * 1000 + data.timezone * 1000).toString(),
-        };
-        let sortData = [...cardList, getJson].sort((a, b) => b.count - a.count);
-        setCardList(sortData);
-      })
-      .catch((error) => {
-        return Swal.fire("City not found");
-      });
+    try {
+      const { data } = await axios.get(url);
+      const newState = countData + 1;
+      setCountData(newState);
+      const temp = parseInt(data.main.temp - 273);
+      const getJson = await getJsonData(newState, data, temp);
+      let sortData = await [...cardList, getJson].sort(
+        (a, b) => b.count - a.count
+      );
+      setCardList(sortData);
+    } catch (error) {
+      return Swal.fire("City not found");
+    }
+  };
+
+  const getJsonData = (newState, data, temp) => {
+    return {
+      id: Math.floor(Math.random() * 10000) + 1,
+      count: newState,
+      name: data.name,
+      weather: data.weather[0].main,
+      description: data.weather[0].description,
+      icon:
+        "http://openweathermap.org/img/wn/" + data.weather[0].icon + "@2x.png",
+      temp: temp,
+      date: new Date(data.dt * 1000 + data.timezone * 1000).toString(),
+    };
   };
 
   const clearAllData = () => {
@@ -58,6 +61,7 @@ export default function Home() {
   useEffect(() => {
     console.log(cardList);
   }, [cardList]);
+
   return (
     <>
       <div className="px-4 sm:px-8 lg:px-16 xl:px-20 mx-auto">
