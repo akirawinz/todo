@@ -1,46 +1,47 @@
-import React, { useState, useEffect } from "react";
-import Swal from "sweetalert2";
-import SearchForm from "@components/searchForm";
-import CardList from "@components/cardList";
-import axios from "axios";
-import RecentCount from "@components/recentCount";
+import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
+import SearchForm from '@components/searchForm';
+import CardList from '@components/cardList';
+import axios from 'axios';
+import RecentCount from '@components/recentCount';
+
+type Weathers = {
+  count: number;
+  date: string;
+  description: string;
+  icon: string;
+  id: number;
+  name: string;
+  temp: number;
+  weather: string;
+};
 
 export default function Home() {
-  // const initialData = [
-  //   {
-  //     id: 1,
-  //     name: "London",
-  //     weather: "clear",
-  //     description: "clear sky",
-  //     icon: "http://openweathermap.org/img/w/01d.png",
-  //     temp: 29,
-  //     date: "Thu Apr 08 2021 01:32:12 GMT+0700",
-  //   },
-  // ];
+  const [cardList, setCardList] = useState<Weathers[] | []>([]);
+  const [countData, setCountData] = useState<number>(0);
 
-  const [cardList, setCardList]: any = useState([]);
-  const [countData, setCountData] = useState(0);
-  const searchWeather = async (value: string) => {
+  const searchWeather = async (value: string): Promise<void> => {
     const url =
-      "https://api.openweathermap.org/data/2.5/weather?q=" +
+      'https://api.openweathermap.org/data/2.5/weather?q=' +
       value +
-      "&appid=2c486a422a8abed95fca0bbd2c35fc80";
+      '&appid=2c486a422a8abed95fca0bbd2c35fc80';
     try {
       const { data } = await axios.get(url);
       const newState = countData + 1;
       setCountData(newState);
-      const temp = parseInt(data.main.temp - 273);
+      const temp = data.main.temp - 273;
       const getJson = await getJsonData(newState, data, temp);
+      console.log(getJson);
       let sortData = await [...cardList, getJson].sort(
         (a, b) => b.count - a.count
       );
       setCardList(sortData);
     } catch (error) {
-      return Swal.fire("City not found");
+      Swal.fire('City not found');
     }
   };
 
-  const getJsonData = (newState, data, temp) => {
+  const getJsonData = (newState: number, data: any, temp: number): Weathers => {
     return {
       id: Math.floor(Math.random() * 10000) + 1,
       count: newState,
@@ -48,13 +49,13 @@ export default function Home() {
       weather: data.weather[0].main,
       description: data.weather[0].description,
       icon:
-        "http://openweathermap.org/img/wn/" + data.weather[0].icon + "@2x.png",
+        'http://openweathermap.org/img/wn/' + data.weather[0].icon + '@2x.png',
       temp: temp,
       date: new Date(data.dt * 1000 + data.timezone * 1000).toString(),
     };
   };
 
-  const clearAllData = () => {
+  const clearAllData = (): void => {
     setCountData(0);
     setCardList([]);
   };
